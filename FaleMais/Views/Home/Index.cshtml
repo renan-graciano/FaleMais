@@ -1,0 +1,101 @@
+﻿@model List<Dominio.PrecoOrigemDestino>
+@{
+    ViewBag.Title = "Planos FaleMais";
+}
+
+<div class="jumbotron">
+    <h1>Planos FaleMais</h1>
+    <p class="lead">
+        Com o novo produto FaleMais da Skynetz você adquire um plano e pode falar de graça até um determinado tempo (em minutos) e só paga os minutos excedentes. Os minutos excedentes tem um acrescimo de 10% sobre a tarifa normal do minuto. Os planos são FaleMais 30 (30 minutos), FaleMais 60 (60 minutos) e FaleMais 120 (120 minutos).
+        </a>
+    </p>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-primary list-panel" id="list-panel" style="width:100%">
+            <div class="panel-heading list-panel-heading">
+                <h1 class="panel-title list-panel-title">Valores por minuto</h1>
+            </div>
+            <div class="panel-body">
+                <table id="valores-data-table"
+                       class="table table-striped table-bordered"
+                       style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Origem</th>
+                            <th>Destino</th>
+                            <th>R$/Min</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var precoMin in Model)
+                        {
+                            <tr>
+                                <td>@precoMin.Origem</td>
+                                <td>@precoMin.Destino</td>
+                                <td>@precoMin.Preco.ToString("0.00")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="jumbotron">
+    <div class="form-inline">
+        <label for="min">Minutos:</label>
+        <input type="number" class="form-control" id="min">
+        <label>Plano:</label>
+        @Html.DropDownList("Planos",
+       EnumHelper.GetSelectList(typeof(Dominio.Enums.Plano)) ,
+       "Selecione",
+       new { @class = "form-control comboPlanos" })
+        <button type="button" class="btn btn-primary" onclick="ObterComparacao()">Comparar</button>
+    </div>
+</div>
+
+<div class="row" id="divListaComparacao">
+    
+</div>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+        function ObterComparacao() {
+            var min = $("#min").val();
+            var plan = $(".comboPlanos").val();
+
+            if (plan == "") {
+                return alert("Selecione um plano valido.");
+            }
+            if (min < 0 || min == "") {
+                return alert("minutos invalidos.");
+            }
+
+            var data = {
+                min,
+                plan
+            };
+
+            $.ajax({
+                type: "POST",
+                url: '/Home/GerarComparacoes',
+                data: data,
+                dataType: 'HTML',
+                success: function (retorno) {
+                    debugger;
+                    console.log(retorno);
+                    let div = $('#divListaComparacao');
+                    div.empty();
+                    div.append(retorno);
+                }
+
+            });
+
+        }
+    </script>
+}
